@@ -35,7 +35,7 @@ jobs:
       # --- Step 2: Clone Screamer Fork ---
       - name: Clone QEMU Screamer Repository
         run: |
-          git clone --depth 1 https://github.com/cat7/qemu -d smp-audio-usb
+          git clone -b smp-audio-usb --depth 1 https://github.com/cat7/qemu
 
       - name: Setup ccache
         uses: actions/cache@v4
