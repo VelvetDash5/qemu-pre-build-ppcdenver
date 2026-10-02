@@ -49,12 +49,16 @@ jobs:
             --disable-werror \
             --enable-virtfs \
             --enable-plugins
+
+      - name: Compile Governor Plugin
+        run: |
+          cd qemu
+          ninja contrib/plugins/libgovernor.so
             
       # --- Step 4: Compile ---
       - name: Compile QEMU
         run: |
           cd qemu
-          ninja contrib/plugins/libgovernor.so
           make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
 
       # --- Step 5: Package Executable ---
