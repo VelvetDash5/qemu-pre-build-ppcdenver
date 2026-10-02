@@ -59,13 +59,7 @@ jobs:
           cd qemu
           mkdir -p build
           cd build
-          ../configure \
-            --target-list=ppc-softmmu \
-            --audio-drv-list=pa,sdl \
-            --enable-sdl \
-            --disable-werror \
-            --enable-virtfs \
-            --enable-plugins
+          ../configure
 
       - name: Compile Governor Plugin
         run: |
