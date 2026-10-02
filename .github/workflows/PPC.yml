@@ -59,7 +59,7 @@ jobs:
           cd qemu
           mkdir -p build
           cd build
-          ../configure --target-list=ppc-softmmu
+          ../configure --target-list=ppc-softmmu --disable-werror
       - name: Compile Governor Plugin
         run: |
           cd qemu
