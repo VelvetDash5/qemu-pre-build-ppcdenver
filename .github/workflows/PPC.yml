@@ -37,6 +37,20 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/cat7/qemu
 
+      - name: Setup ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      # Configure ccache options and display initial status
+      - name: Zero ccache statistics
+        run: |
+          ccache -M 2G # Sets maximum cache size to 2 GB
+          ccache -z    # Zeroes stats to track hit rate for this run
+
       # --- Step 3: Configure Build ---
       - name: Configure QEMU (Linux)
         if: matrix.target_os == 'linux'
@@ -45,6 +59,8 @@ jobs:
           mkdir -p build
           cd build
           ../configure \
+            --cc="ccache gcc"
+            --cxx="ccache g++"
             --target-list=ppc-softmmu \
             --audio-drv-list=pa,sdl \
             --enable-sdl \
@@ -72,7 +88,7 @@ jobs:
           cp qemu/build/qemu-system-ppc build-out/
           # Include BIOS files required by QEMU to boot Mac OS 9
           cp -r qemu/pc-bios build-out/
-          cp -r qemu/build/contrib/plugins/libgovernor.so build_out/
+          cp -r qemu/build/contrib/plugins build_out/
 
       # --- Step 6: Upload Artifact ---
       - name: Upload QEMU Screamer Binary
