@@ -55,12 +55,11 @@ jobs:
       - name: Configure QEMU (Linux)
         if: matrix.target_os == 'linux'
         run: |
+          export PATH="/usr/lib/ccache:$PATH"
           cd qemu
           mkdir -p build
           cd build
           ../configure \
-            --cc="ccache gcc"
-            --cxx="ccache g++"
             --target-list=ppc-softmmu \
             --audio-drv-list=pa,sdl \
             --enable-sdl \
