@@ -72,6 +72,7 @@ jobs:
           cp qemu/build/qemu-system-ppc build-out/
           # Include BIOS files required by QEMU to boot Mac OS 9
           cp -r qemu/pc-bios build-out/
+          cp -r qemu/build/contrib/plugins/libgovernor.so
 
       # --- Step 6: Upload Artifact ---
       - name: Upload QEMU Screamer Binary
@@ -79,6 +80,4 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: build-out/
-          files: |
-           build/contrib/plugins/*.so
           
