@@ -29,7 +29,7 @@ jobs:
           sudo apt-get install -y \
             build-essential git python3 python3-pip ninja-build pkg-config \
             libglib2.0-dev libpixman-1-dev libsdl2-dev libpulse-dev \
-            flex bison libslirp-dev libcap-ng-dev libattr1-dev wget
+            flex bison libslirp-dev libcap-ng-dev libattr1-dev wget ninja
 
 
       # --- Step 2: Clone Screamer Fork ---
@@ -48,12 +48,14 @@ jobs:
             --audio-drv-list=pa,sdl \
             --enable-sdl \
             --disable-werror \
-            --enable-virtfs
-
+            --enable-virtfs \
+            --enable-plugins
+            
       # --- Step 4: Compile ---
       - name: Compile QEMU
         run: |
           cd qemu-screamer
+          ninja contrib/plugins/libgovernor.so
           make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
 
       # --- Step 5: Package Executable ---
@@ -70,3 +72,6 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: build-out/
+          files: |
+           build/contrib/plugins/*.so
+          
