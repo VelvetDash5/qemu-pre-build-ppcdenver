@@ -50,7 +50,9 @@ jobs:
         if: matrix.target_os == 'linux'
         run: |
           cd qemu
-          ./configure \
+          mkdir -p build
+          cd build
+          ../configure \
             --target-list=ppc-softmmu \
             --audio-drv-list=pa,sdl \
             --enable-sdl \
@@ -61,12 +63,14 @@ jobs:
       - name: Compile Governor Plugin
         run: |
           cd qemu
+          cd build
           ninja contrib/plugins/libgovernor.so
             
       # --- Step 4: Compile ---
       - name: Compile QEMU
         run: |
           cd qemu
+          cd build
           make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
 
       # --- Step 5: Package Executable ---
