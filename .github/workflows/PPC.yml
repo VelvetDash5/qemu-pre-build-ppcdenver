@@ -37,6 +37,14 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/cat7/qemu
 
+      - name: Configure and Build inside qemu directory
+        run: |
+          cd qemu
+          mkdir -p build
+          cd build
+          ../configure --enable-plugins
+          ninja contrib/plugins/libgovernor.so
+
       # --- Step 3: Configure Build ---
       - name: Configure QEMU (Linux)
         if: matrix.target_os == 'linux'
