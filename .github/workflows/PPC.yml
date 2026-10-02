@@ -1,0 +1,72 @@
+name: Build QEMU Screamer (PPC Audio)
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+  push:
+    branches: [ main ]
+
+jobs:
+  build-screamer:
+    strategy:
+      matrix:
+        include:
+          # Linux Build (Ubuntu)
+          - os: ubuntu-22.04
+            target_os: linux
+            artifact_name: qemu-system-ppc-screamer-linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # --- Step 1: Install Dependencies ---
+      - name: Install Linux Dependencies
+        if: matrix.target_os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential git python3 python3-pip ninja-build pkg-config \
+            libglib2.0-dev libpixman-1-dev libsdl2-dev libpulse-dev \
+            flex bison libslirp-dev libcap-ng-dev libattr1-dev wget
+
+
+      # --- Step 2: Clone Screamer Fork ---
+      - name: Clone QEMU Screamer Repository
+        run: |
+          git clone --depth 1 -b screamer https://github.com/mcayland/qemu.git qemu-screamer
+
+      # --- Step 3: Configure Build ---
+      - name: Configure QEMU (Linux)
+        if: matrix.target_os == 'linux'
+        run: |
+          cd qemu-screamer
+          patch -p1 ../qemu-virtio-gpu.patch
+          ./configure \
+            --target-list=ppc-softmmu \
+            --audio-drv-list=pa,sdl \
+            --enable-sdl \
+            --disable-werror \
+            --enable-virtfs
+
+      # --- Step 4: Compile ---
+      - name: Compile QEMU
+        run: |
+          cd qemu-screamer
+          make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+      # --- Step 5: Package Executable ---
+      - name: Package Binary Artifact
+        run: |
+          mkdir build-out
+          cp qemu-screamer/build/qemu-system-ppc build-out/
+          # Include BIOS files required by QEMU to boot Mac OS 9
+          cp -r qemu-screamer/pc-bios build-out/
+
+      # --- Step 6: Upload Artifact ---
+      - name: Upload QEMU Screamer Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: build-out/
