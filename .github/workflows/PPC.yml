@@ -29,20 +29,19 @@ jobs:
           sudo apt-get install -y \
             build-essential git python3 python3-pip ninja-build pkg-config \
             libglib2.0-dev libpixman-1-dev libsdl2-dev libpulse-dev \
-            flex bison libslirp-dev libcap-ng-dev libattr1-dev wget ninja
+            flex bison libslirp-dev libcap-ng-dev libattr1-dev wget ninja-build
 
 
       # --- Step 2: Clone Screamer Fork ---
       - name: Clone QEMU Screamer Repository
         run: |
-          git clone --depth 1 -b screamer https://github.com/mcayland/qemu.git qemu-screamer
+          git clone --depth 1 https://github.com/cat7/qemu
 
       # --- Step 3: Configure Build ---
       - name: Configure QEMU (Linux)
         if: matrix.target_os == 'linux'
         run: |
-          cd qemu-screamer
-          patch -p1 ../qemu-virtio-gpu.patch
+          cd qemu
           ./configure \
             --target-list=ppc-softmmu \
             --audio-drv-list=pa,sdl \
@@ -54,7 +53,7 @@ jobs:
       # --- Step 4: Compile ---
       - name: Compile QEMU
         run: |
-          cd qemu-screamer
+          cd qemu
           ninja contrib/plugins/libgovernor.so
           make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
 
@@ -62,9 +61,9 @@ jobs:
       - name: Package Binary Artifact
         run: |
           mkdir build-out
-          cp qemu-screamer/build/qemu-system-ppc build-out/
+          cp qemu/build/qemu-system-ppc build-out/
           # Include BIOS files required by QEMU to boot Mac OS 9
-          cp -r qemu-screamer/pc-bios build-out/
+          cp -r qemu/pc-bios build-out/
 
       # --- Step 6: Upload Artifact ---
       - name: Upload QEMU Screamer Binary
